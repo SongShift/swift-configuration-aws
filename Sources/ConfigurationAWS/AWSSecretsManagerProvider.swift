@@ -57,11 +57,11 @@ public struct AWSSecretsManagerProvider: ConfigProvider {
     }
     
     public func watchValue<Return>(forKey key: Configuration.AbsoluteConfigKey, type: Configuration.ConfigType, updatesHandler: (Configuration.ConfigUpdatesAsyncSequence<Result<Configuration.LookupResult, any Error>, Never>) async throws -> Return) async throws -> Return {
-        try await watchValueFromValue(forKey: key, type: type, updatesHandler: updatesHandler)
+        try await _snapshot.cache.watchValueFromValue(forKey: key, type: type, updatesHandler: updatesHandler)
     }
     
     public func watchSnapshot<Return>(updatesHandler: (ConfigUpdatesAsyncSequence<any ConfigSnapshotProtocol, Never>) async throws -> Return) async throws -> Return {
-        try await watchSnapshotFromSnapshot(updatesHandler: updatesHandler)
+        try await _snapshot.cache.watchSnapshotFromSnapshot(updatesHandler: updatesHandler)
     }
     
     public func snapshot() -> any Configuration.ConfigSnapshotProtocol {
@@ -72,6 +72,8 @@ public struct AWSSecretsManagerProvider: ConfigProvider {
 public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshotProtocol {
     public let providerName: String = "AWSSecretsManagerProvider"
 
+    // The idea to use this setup with MutableInMemoryProvider is inspired by this PR:
+    // https://github.com/vault-courier/vault-courier/pull/57/files#diff-7d50e4a6948e257cb850e6051a78d5b2cc68851018c084712cccd2631921f032R155
     let cache: MutableInMemoryProvider
 
     public init() {
