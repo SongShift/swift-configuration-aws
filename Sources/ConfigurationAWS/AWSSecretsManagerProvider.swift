@@ -23,12 +23,10 @@ public struct AWSSecretsManagerProvider: ConfigProvider {
     private let _snapshot: AWSSecretsManagerProviderSnapshot
     
     private let _vendor: AWSSecretsManagerVendor
-    private let _keyToSecretNameMapping: [String: String]
     
-    public init(vendor: AWSSecretsManagerVendor, keyToSecretNameMapping: [String: String] = [:]) {
+    public init(vendor: AWSSecretsManagerVendor) {
         self._snapshot = AWSSecretsManagerProviderSnapshot()
         self._vendor = vendor
-        self._keyToSecretNameMapping = keyToSecretNameMapping
     }
     
     public func value(forKey key: Configuration.AbsoluteConfigKey, type: Configuration.ConfigType) throws -> Configuration.LookupResult {
@@ -45,10 +43,6 @@ public struct AWSSecretsManagerProvider: ConfigProvider {
         let keyName = lastTwoComponents[0]
         let fieldName = lastTwoComponents[1]
         
-        guard let keyName = _keyToSecretNameMapping[keyName] else {
-            return LookupResult(encodedKey: encodedKey, value: nil)
-        }
-
         guard let secretValue = try await _vendor.fetchSecretValue(forKey: keyName) else {
             return LookupResult(encodedKey: encodedKey, value: nil)
         }

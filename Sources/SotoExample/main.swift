@@ -12,7 +12,7 @@ import SotoSecretsManager
 
 let sotoSecretsManager = SecretsManager(client: .init(), region: .useast2)
 
-let awsSecretsManagerProvider = AWSSecretsManagerProvider(vendor: sotoSecretsManager, keyToSecretNameMapping: ["myExampleSecret": "MySecretName"])
+let awsSecretsManagerProvider = AWSSecretsManagerProvider(vendor: sotoSecretsManager)
 let configReader = ConfigReader(provider: awsSecretsManagerProvider)
 
 do {
