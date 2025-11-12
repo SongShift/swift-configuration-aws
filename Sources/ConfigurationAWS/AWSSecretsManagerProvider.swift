@@ -7,12 +7,12 @@
 //
 
 import Configuration
+import Synchronization
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
-import Synchronization
 #endif
 
 public final class AWSSecretsManagerProvider: ConfigProvider, Sendable {
