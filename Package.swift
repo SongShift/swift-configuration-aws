@@ -17,6 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-configuration", .upToNextMinor(from: "0.2.0")),
+        .package(url: "https://github.com/apple/swift-service-lifecycle", .upToNextMinor(from: "2.9.1")),
         .package(url: "https://github.com/soto-project/soto.git", from: "7.10.0")
     ],
     targets: [
@@ -25,7 +26,8 @@ let package = Package(
         .target(
             name: "ConfigurationAWS",
             dependencies: [
-                .product(name: "Configuration", package: "swift-configuration")
+                .product(name: "Configuration", package: "swift-configuration"),
+                .product(name: "ServiceLifecycle", package: "swift-service-lifecycle")
             ]
         ),
         .executableTarget(
