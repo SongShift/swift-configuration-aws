@@ -115,23 +115,26 @@ public final class _AWSSecretsManagerProvider<C: Clock & Sendable>: Sendable whe
     // MARK: - Cache reload engine
 
     func reloadSecretIfNeeded(secretName: String, overrideCacheTTL: Bool = false) async throws {
-        let lastUpdatedAt = storage.withLock { storage in
-            storage.lastUpdatedAt[secretName]
+        let (lastUpdatedAt, hasCachedValue) = storage.withLock { storage in
+            (storage.lastUpdatedAt[secretName], storage.snapshot.values[secretName] != nil)
         }
 
-        // Cache TTL check
+        // Single lock read for both timestamp and cached-value presence to avoid a TOCTOU gap.
         if !overrideCacheTTL,
            let lastUpdatedAt,
-           storage.withLock({ $0.snapshot.values[secretName] }) != nil,
+           hasCachedValue,
            lastUpdatedAt.duration(to: clock.now) < cacheTTL {
             return
         }
 
+        // Update lastUpdatedAt even on nil/non-JSON results so the TTL cooldown prevents repeated vendor calls.
         guard let secretValueLookup = try await _vendor.fetchSecretValue(forKey: secretName) else {
+            storage.withLock { $0.lastUpdatedAt[secretName] = clock.now }
             return
         }
 
         guard let secretLookupDict = try? JSONSerialization.jsonObject(with: Data(secretValueLookup.utf8), options: []) as? [String: Sendable] else {
+            storage.withLock { $0.lastUpdatedAt[secretName] = clock.now }
             return
         }
 

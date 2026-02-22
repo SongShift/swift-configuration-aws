@@ -62,8 +62,12 @@ extension _AWSSecretsManagerProvider: ConfigProvider {
         return stream
     }
 
+    /// Removes the observer and finishes its continuation to cleanly terminate the AsyncStream.
     private func stopObservingSecretKey(observerID: UUID, key: AbsoluteConfigKey) {
-        storage.withLock { $0.secretKeyObservers[key, default: [:]][observerID] = nil }
+        storage.withLock {
+            $0.secretKeyObservers[key, default: [:]]
+                .removeValue(forKey: observerID)?.finish()
+        }
     }
 
     /// Registers a snapshot observer, yields the current snapshot, and returns the update stream.
@@ -78,7 +82,8 @@ extension _AWSSecretsManagerProvider: ConfigProvider {
         return stream
     }
 
+    /// Removes the observer and finishes its continuation to cleanly terminate the AsyncStream.
     private func stopObservingSecrets(observerID: UUID) {
-        storage.withLock { $0.secretSnapshotObservers[observerID] = nil }
+        storage.withLock { $0.secretSnapshotObservers.removeValue(forKey: observerID)?.finish() }
     }
 }
