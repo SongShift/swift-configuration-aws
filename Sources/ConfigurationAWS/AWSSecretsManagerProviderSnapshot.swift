@@ -23,14 +23,13 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
         let encodedKey = key.description
 
         let keyComponents = key.components
-        guard keyComponents.count >= 2 else {
+        guard let secretName = keyComponents.first else {
             return LookupResult(encodedKey: encodedKey, value: nil)
         }
-        let secretName = keyComponents[0]
-        
+
         let secretLookupDict = values[secretName]
 
-        guard let content = extractConfigContent(from: secretLookupDict, keyComponents: key.components) else {
+        guard let content = extractConfigContent(from: secretLookupDict, keyComponents: key.components, type: type) else {
             return LookupResult(encodedKey: encodedKey, value: nil)
         }
 
@@ -61,30 +60,47 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
         return currentDictionary
     }
 
-    private func convertToConfigContent(_ value: Sendable) -> ConfigContent? {
-        switch value {
-        case let integer as Int:
-            return .int(integer)
-        case let intArray as [Int]:
-            return .intArray(intArray)
-        case let double as Double:
-            return .double(double)
-        case let doubleArray as [Double]:
-            return .doubleArray(doubleArray)
-        case let bool as Bool:
-            return .bool(bool)
-        case let boolArray as [Bool]:
-            return .boolArray(boolArray)
-        case let string as String:
-            return .string(string)
-        case let stringArray as [String]:
-            return .stringArray(stringArray)
-        default:
-            return nil
+    private func convertToConfigContent(_ value: Sendable, type: ConfigType) -> ConfigContent? {
+        switch type {
+        case .string:
+            guard let v = value as? String else { return nil }
+            return .string(v)
+        case .int:
+            guard let v = value as? Int else { return nil }
+            return .int(v)
+        case .double:
+            guard let v = value as? Double else { return nil }
+            return .double(v)
+        case .bool:
+            guard let v = value as? Bool else { return nil }
+            return .bool(v)
+        case .bytes:
+            guard let ints = value as? [Int] else { return nil }
+            return .bytes(ints.map { UInt8($0) })
+        case .stringArray:
+            guard let v = value as? [String] else { return nil }
+            return .stringArray(v)
+        case .intArray:
+            guard let v = value as? [Int] else { return nil }
+            return .intArray(v)
+        case .doubleArray:
+            guard let v = value as? [Double] else { return nil }
+            return .doubleArray(v)
+        case .boolArray:
+            guard let v = value as? [Bool] else { return nil }
+            return .boolArray(v)
+        case .byteChunkArray:
+            guard let chunks = value as? [Any] else { return nil }
+            var result: [[UInt8]] = []
+            for chunk in chunks {
+                guard let ints = chunk as? [Int] else { return nil }
+                result.append(ints.map { UInt8($0) })
+            }
+            return .byteChunkArray(result)
         }
     }
 
-    private func extractConfigContent(from dictionary: [String: Sendable]?, keyComponents: [String]) -> ConfigContent? {
+    private func extractConfigContent(from dictionary: [String: Sendable]?, keyComponents: [String], type: ConfigType) -> ConfigContent? {
         guard let dictionary = dictionary else {
             return nil
         }
@@ -98,6 +114,6 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
             return nil
         }
 
-        return convertToConfigContent(secretValue)
+        return convertToConfigContent(secretValue, type: type)
     }
 }
