@@ -15,17 +15,20 @@ import Foundation
 #endif
 
 // MARK: - ConfigProvider conformance
-extension _AWSSecretsManagerProvider: ConfigProvider {
 
+extension _AWSSecretsManagerProvider: ConfigProvider {
     public func value(forKey key: AbsoluteConfigKey, type: ConfigType) throws -> LookupResult {
         try storage.withLock { storage in
             try storage.snapshot.value(forKey: key, type: type)
         }
     }
 
-    public func fetchValue(forKey key: AbsoluteConfigKey, type: ConfigType) async throws -> LookupResult {
+    public func fetchValue(
+        forKey key: AbsoluteConfigKey,
+        type: ConfigType
+    ) async throws -> LookupResult {
         try await reloadSecretIfNeeded(secretName: key.components.first!)
-        return try value(forKey: key, type: type)
+        return try self.value(forKey: key, type: type)
     }
 
     public func snapshot() -> any ConfigSnapshot {
@@ -34,24 +37,48 @@ extension _AWSSecretsManagerProvider: ConfigProvider {
 
     // MARK: - Secret observation
 
-    public func watchValue<Return: ~Copyable>(forKey key: AbsoluteConfigKey, type: ConfigType, updatesHandler: nonisolated(nonsending) (ConfigUpdatesAsyncSequence<Result<LookupResult, any Error>, Never>) async throws -> Return) async throws -> Return {
+    public func watchValue<Return: ~Copyable>(
+        forKey key: AbsoluteConfigKey,
+        type: ConfigType,
+        updatesHandler: nonisolated(nonsending)(ConfigUpdatesAsyncSequence<
+            Result<LookupResult, any Error>,
+            Never
+        >) async throws -> Return
+    ) async throws -> Return {
         let observerID = UUID()
-        let secretUpdates = startObservingSecretKey(observerID: observerID, key: key, type: type)
+        let secretUpdates = self.startObservingSecretKey(
+            observerID: observerID,
+            key: key,
+            type: type
+        )
         defer { stopObservingSecretKey(observerID: observerID, key: key) }
         return try await updatesHandler(.init(secretUpdates))
     }
 
-    public func watchSnapshot<Return: ~Copyable>(updatesHandler: nonisolated(nonsending) (ConfigUpdatesAsyncSequence<any ConfigSnapshot, Never>) async throws -> Return) async throws -> Return {
+    public func watchSnapshot<Return: ~Copyable>(
+        updatesHandler: nonisolated(nonsending)(ConfigUpdatesAsyncSequence<
+            any ConfigSnapshot,
+            Never
+        >) async throws -> Return
+    ) async throws -> Return {
         let observerID = UUID()
-        let secretUpdates = startObservingSecrets(observerID: observerID)
+        let secretUpdates = self.startObservingSecrets(observerID: observerID)
         defer { stopObservingSecrets(observerID: observerID) }
-        return try await updatesHandler(.init(secretUpdates.map { $0 }))
+        return try await updatesHandler(.init(secretUpdates.map(\.self)))
     }
 
     // MARK: - Observer lifecycle
 
-    /// Registers an observer for a specific secret key path, yields the current value, and returns the update stream.
-    private func startObservingSecretKey(observerID: UUID, key: AbsoluteConfigKey, type: ConfigType) -> AsyncStream<Result<LookupResult, any Error>> {
+    /// Registers an observer for a specific secret key path, yields the current value, and returns
+    /// the update stream.
+    private func startObservingSecretKey(
+        observerID: UUID,
+        key: AbsoluteConfigKey,
+        type: ConfigType
+    ) -> AsyncStream<Result<
+        LookupResult,
+        any Error
+    >> {
         let (stream, continuation) = AsyncStream<Result<LookupResult, any Error>>
             .makeStream(bufferingPolicy: .bufferingNewest(1))
         let currentResult = storage.withLock { storage in
@@ -66,12 +93,14 @@ extension _AWSSecretsManagerProvider: ConfigProvider {
     private func stopObservingSecretKey(observerID: UUID, key: AbsoluteConfigKey) {
         storage.withLock {
             $0.secretKeyObservers[key, default: [:]]
-                .removeValue(forKey: observerID)?.finish()
+                .removeValue(forKey: observerID)?
+                .finish()
         }
     }
 
     /// Registers a snapshot observer, yields the current snapshot, and returns the update stream.
-    private func startObservingSecrets(observerID: UUID) -> AsyncStream<AWSSecretsManagerProviderSnapshot> {
+    private func startObservingSecrets(observerID: UUID)
+        -> AsyncStream<AWSSecretsManagerProviderSnapshot> {
         let (stream, continuation) = AsyncStream<AWSSecretsManagerProviderSnapshot>
             .makeStream(bufferingPolicy: .bufferingNewest(1))
         let currentSnapshot = storage.withLock { storage in

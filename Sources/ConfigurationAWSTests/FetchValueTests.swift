@@ -1,13 +1,12 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Fetch Value")
 struct FetchValueTests {
-
     @Test func fetchValueOnDemandPopulatesCache() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "hello"}"#
+            "secret": #"{"field": "hello"}"#,
         ])
         let provider = AWSSecretsManagerProvider(vendor: vendor)
 
@@ -41,7 +40,10 @@ struct FetchValueTests {
         await vendor.setSecret("secret", value: #"{"field": "new"}"#)
         clock.advance(by: .seconds(11))
 
-        let newResult = try await provider.fetchValue(forKey: configKey("secret.field"), type: .string)
+        let newResult = try await provider.fetchValue(
+            forKey: configKey("secret.field"),
+            type: .string
+        )
         #expect(newResult.value?.content == .string("new"))
     }
 
@@ -80,7 +82,7 @@ struct FetchValueTests {
 
     @Test func allValuesAreMarkedSecret() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,

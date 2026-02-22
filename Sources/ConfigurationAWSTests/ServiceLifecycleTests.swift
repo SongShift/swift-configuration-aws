@@ -1,10 +1,9 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Service Lifecycle")
 struct ServiceLifecycleTests {
-
     @Test func runReturnsImmediatelyWithoutPollingInterval() async throws {
         let vendor = MockVendor(secrets: [:])
         let provider = try await AWSSecretsManagerProvider(
@@ -67,7 +66,7 @@ struct ServiceLifecycleTests {
                                 continue
                             }
                             let content = try value.get().value?.content
-                            if case .string(let s) = content {
+                            if case let .string(s) = content {
                                 #expect(s == "polled")
                                 confirm()
                             }
@@ -78,7 +77,10 @@ struct ServiceLifecycleTests {
 
                 try await Task.sleep(for: .milliseconds(50))
                 await vendor.setSecret("secret", value: #"{"field": "polled"}"#)
-                try await provider.reloadSecretIfNeeded(secretName: "secret", overrideCacheTTL: true)
+                try await provider.reloadSecretIfNeeded(
+                    secretName: "secret",
+                    overrideCacheTTL: true
+                )
 
                 try await group.waitForAll()
             }

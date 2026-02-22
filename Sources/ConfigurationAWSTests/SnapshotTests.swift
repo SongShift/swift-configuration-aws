@@ -1,14 +1,13 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("AWSSecretsManagerProviderSnapshot")
 struct SnapshotTests {
-
     @Test func singleComponentKey() throws {
         // Key ["secret"] with JSON {"secret": "val"} — last component == secret name
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "secret": ["secret": "val"]
+            "secret": ["secret": "val"],
         ])
         let result = try snapshot.value(forKey: configKey("secret"), type: .string)
         #expect(result.value?.content == .string("val"))
@@ -16,7 +15,7 @@ struct SnapshotTests {
 
     @Test func twoComponentKey() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "mySecret": ["field": "hello"]
+            "mySecret": ["field": "hello"],
         ])
         let result = try snapshot.value(forKey: configKey("mySecret.field"), type: .string)
         #expect(result.value?.content == .string("hello"))
@@ -24,7 +23,7 @@ struct SnapshotTests {
 
     @Test func deeplyNestedKey() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "root": ["a": ["b": ["c": "deep"]] as [String: Sendable]] as [String: Sendable]
+            "root": ["a": ["b": ["c": "deep"]] as [String: Sendable]] as [String: Sendable],
         ])
         let result = try snapshot.value(forKey: configKey("root.a.b.c"), type: .string)
         #expect(result.value?.content == .string("deep"))
@@ -38,7 +37,7 @@ struct SnapshotTests {
 
     @Test func missingIntermediateKeyReturnsNil() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "secret": ["a": "value"]
+            "secret": ["a": "value"],
         ])
         let result = try snapshot.value(forKey: configKey("secret.missing.field"), type: .string)
         #expect(result.value == nil)
@@ -46,7 +45,7 @@ struct SnapshotTests {
 
     @Test func emptyKeyComponentsReturnsNil() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "secret": ["field": "value"]
+            "secret": ["field": "value"],
         ])
         let result = try snapshot.value(forKey: AbsoluteConfigKey([]), type: .string)
         #expect(result.value == nil)
@@ -55,7 +54,7 @@ struct SnapshotTests {
     @Test func encodedKeyMatchesKeyDescription() throws {
         let key = configKey("mySecret.field")
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "mySecret": ["field": "hello"]
+            "mySecret": ["field": "hello"],
         ])
         let result = try snapshot.value(forKey: key, type: .string)
         #expect(result.encodedKey == key.description)
@@ -68,7 +67,7 @@ struct SnapshotTests {
 
     @Test func snapshotIsValueType() throws {
         var original = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["f": "original"]
+            "s": ["f": "original"],
         ])
         let copy = original
         original.values["s"] = ["f": "mutated"]

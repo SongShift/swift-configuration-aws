@@ -1,14 +1,13 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Cache TTL")
 struct CacheTTLTests {
-
     @Test func freshCacheSkipsVendorCall() async throws {
         let clock = TestClock()
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
@@ -27,7 +26,7 @@ struct CacheTTLTests {
     @Test func staleCacheTriggersVendorCall() async throws {
         let clock = TestClock()
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
@@ -46,7 +45,7 @@ struct CacheTTLTests {
     @Test func cacheExactlyAtTTLBoundary() async throws {
         let clock = TestClock()
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
@@ -66,7 +65,7 @@ struct CacheTTLTests {
     @Test func overrideCacheTTLBypassesFreshCache() async throws {
         let clock = TestClock()
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
@@ -83,7 +82,7 @@ struct CacheTTLTests {
     @Test func emptyCacheAlwaysFetches() async throws {
         let clock = TestClock()
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,

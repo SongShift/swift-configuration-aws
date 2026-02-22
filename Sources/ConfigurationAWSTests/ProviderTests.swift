@@ -5,13 +5,12 @@
 //  Created by Ben on 11/16/25.
 //
 
+import ConfigurationTesting
 import Testing
 @testable import ConfigurationAWS
-import ConfigurationTesting
 
 @Suite("Provider Compat")
 struct ProviderTests {
-
     @Test func compatWithPrefetch() async throws {
         let secrets: [String: String] = [
             "string": #"{"string": "Hello"}"#,
@@ -34,5 +33,4 @@ struct ProviderTests {
         )
         try await ProviderCompatTest(provider: provider).runTest()
     }
-
 }

@@ -1,13 +1,12 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Race Detection")
 struct RaceDetectionTests {
-
     @Test func concurrentReloadsProduceConsistentState() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,
@@ -16,9 +15,12 @@ struct RaceDetectionTests {
 
         // Fire many concurrent reloads — should not crash or produce inconsistent state
         try await withThrowingTaskGroup(of: Void.self) { group in
-            for _ in 0..<20 {
+            for _ in 0 ..< 20 {
                 group.addTask {
-                    try await provider.reloadSecretIfNeeded(secretName: "secret", overrideCacheTTL: true)
+                    try await provider.reloadSecretIfNeeded(
+                        secretName: "secret",
+                        overrideCacheTTL: true
+                    )
                 }
             }
             try await group.waitForAll()
