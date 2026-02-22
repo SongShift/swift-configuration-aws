@@ -29,11 +29,22 @@ actor MockVendor: AWSSecretsManagerVendor {
         secrets[key] = value
     }
 
+    func removeSecret(_ key: String) {
+        secrets.removeValue(forKey: key)
+    }
+
+    private var errors: [String: any Error] = [:]
+
+    func setError(_ error: any Error, forKey key: String) {
+        errors[key] = error
+    }
+
     func fetchSecretValue(forKey key: String) async throws -> String? {
         _calls.append(Call(key: key))
         if let handler {
             return try await handler(key)
         }
+        if let error = errors[key] { throw error }
         return secrets[key]
     }
 }

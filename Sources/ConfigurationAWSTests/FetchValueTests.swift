@@ -1,6 +1,5 @@
 import Testing
 import Configuration
-import Synchronization
 @testable import ConfigurationAWS
 
 @Suite("Fetch Value")
@@ -48,12 +47,7 @@ struct FetchValueTests {
 
     @Test func fetchValueWithVendorReturningNilKeepsOldCache() async throws {
         let clock = TestClock()
-        let callCount = Mutex(0)
-        let vendor = MockVendor { _ in
-            let count = callCount.withLock { c in c += 1; return c }
-            if count == 1 { return #"{"field": "cached"}"# }
-            return nil
-        }
+        let vendor = MockVendor(secrets: ["secret": #"{"field": "cached"}"#])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
             clock: clock,
@@ -61,6 +55,7 @@ struct FetchValueTests {
             cacheTTL: .seconds(10)
         )
 
+        await vendor.removeSecret("secret")
         clock.advance(by: .seconds(11))
         let result = try await provider.fetchValue(forKey: configKey("secret.field"), type: .string)
         // Vendor returned nil on refresh, old cached value preserved
@@ -69,12 +64,7 @@ struct FetchValueTests {
 
     @Test func fetchValueWithVendorReturningInvalidJSONKeepsCache() async throws {
         let clock = TestClock()
-        let callCount = Mutex(0)
-        let vendor = MockVendor { _ in
-            let count = callCount.withLock { c in c += 1; return c }
-            if count == 1 { return #"{"field": "cached"}"# }
-            return "not json"
-        }
+        let vendor = MockVendor(secrets: ["secret": #"{"field": "cached"}"#])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
             clock: clock,
@@ -82,6 +72,7 @@ struct FetchValueTests {
             cacheTTL: .seconds(10)
         )
 
+        await vendor.setSecret("secret", value: "not json")
         clock.advance(by: .seconds(11))
         let result = try await provider.fetchValue(forKey: configKey("secret.field"), type: .string)
         #expect(result.value?.content == .string("cached"))
