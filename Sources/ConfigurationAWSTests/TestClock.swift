@@ -1,19 +1,15 @@
-import Synchronization
-
-final class TestClock: Clock, @unchecked Sendable {
+final class TestClock: Clock, Sendable {
     typealias Duration = Swift.Duration
     typealias Instant = ContinuousClock.Instant
 
-    private let _now: Mutex<Instant>
-
-    var now: Instant { _now.withLock { $0 } }
+    nonisolated(unsafe) private(set) var now: Instant
 
     init(now: Instant = ContinuousClock.now) {
-        self._now = .init(now)
+        self.now = now
     }
 
     func advance(by duration: Duration) {
-        _now.withLock { $0 = $0.advanced(by: duration) }
+        now = now.advanced(by: duration)
     }
 
     var minimumResolution: Duration { .nanoseconds(1) }

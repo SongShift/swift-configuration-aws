@@ -1,6 +1,5 @@
 import Testing
 import Configuration
-import Synchronization
 @testable import ConfigurationAWS
 
 @Suite("Vendor Errors")
@@ -17,12 +16,7 @@ struct VendorErrorTests {
 
     @Test func vendorThrowsDuringReloadKeepsOldCache() async throws {
         let clock = TestClock()
-        let callCount = Mutex(0)
-        let vendor = MockVendor { _ in
-            let count = callCount.withLock { c in c += 1; return c }
-            if count == 1 { return #"{"field": "cached"}"# }
-            throw TestError.simulatedFailure
-        }
+        let vendor = MockVendor(secrets: ["secret": #"{"field": "cached"}"#])
         let provider = try await _AWSSecretsManagerProvider(
             vendor: vendor,
             clock: clock,
@@ -34,7 +28,8 @@ struct VendorErrorTests {
         let initial = try provider.value(forKey: configKey("secret.field"), type: .string)
         #expect(initial.value?.content == .string("cached"))
 
-        // Expire cache and attempt reload — vendor throws
+        // Expire cache and make vendor throw on next fetch
+        await vendor.setError(TestError.simulatedFailure, forKey: "secret")
         clock.advance(by: .seconds(11))
         do {
             _ = try await provider.fetchValue(forKey: configKey("secret.field"), type: .string)
