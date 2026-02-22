@@ -1,10 +1,9 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Vendor Errors")
 struct VendorErrorTests {
-
     @Test func vendorThrowsDuringFetchValue() async throws {
         let vendor = MockVendor { _ in throw TestError.simulatedFailure }
         let provider = AWSSecretsManagerProvider(vendor: vendor)
@@ -46,13 +45,16 @@ struct VendorErrorTests {
         let vendor = MockVendor { _ in nil }
         let provider = AWSSecretsManagerProvider(vendor: vendor)
 
-        let result = try await provider.fetchValue(forKey: configKey("unknown.field"), type: .string)
+        let result = try await provider.fetchValue(
+            forKey: configKey("unknown.field"),
+            type: .string
+        )
         #expect(result.value == nil)
     }
 
     @Test func vendorReturnsNonDictJSON() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": "[1,2,3]"
+            "secret": "[1,2,3]",
         ])
         let provider = AWSSecretsManagerProvider(vendor: vendor)
 
@@ -62,7 +64,7 @@ struct VendorErrorTests {
 
     @Test func vendorReturnsEmptyString() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": ""
+            "secret": "",
         ])
         let provider = AWSSecretsManagerProvider(vendor: vendor)
 

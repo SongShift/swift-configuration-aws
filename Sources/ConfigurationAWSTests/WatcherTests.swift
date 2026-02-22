@@ -1,13 +1,12 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Watchers")
 struct WatcherTests {
-
     @Test func watchValueReceivesInitialValue() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "hello"}"#
+            "secret": #"{"field": "hello"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,
@@ -52,7 +51,7 @@ struct WatcherTests {
                                 continue // Skip initial value
                             }
                             let content = try value.get().value?.content
-                            if case .string(let s) = content {
+                            if case let .string(s) = content {
                                 #expect(s == "updated")
                                 confirm()
                             }
@@ -65,7 +64,10 @@ struct WatcherTests {
                 try await Task.sleep(for: .milliseconds(50))
                 await vendor.setSecret("secret", value: #"{"field": "updated"}"#)
                 clock.advance(by: .seconds(11))
-                try await provider.reloadSecretIfNeeded(secretName: "secret", overrideCacheTTL: true)
+                try await provider.reloadSecretIfNeeded(
+                    secretName: "secret",
+                    overrideCacheTTL: true
+                )
 
                 try await group.waitForAll()
             }
@@ -74,7 +76,7 @@ struct WatcherTests {
 
     @Test func watchSnapshotReceivesInitialSnapshot() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "hello"}"#
+            "secret": #"{"field": "hello"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,
@@ -94,7 +96,7 @@ struct WatcherTests {
 
     @Test func watchSnapshotAlwaysNotifiedOnReload() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "same"}"#
+            "secret": #"{"field": "same"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,
@@ -117,7 +119,10 @@ struct WatcherTests {
                 }
 
                 try await Task.sleep(for: .milliseconds(50))
-                try await provider.reloadSecretIfNeeded(secretName: "secret", overrideCacheTTL: true)
+                try await provider.reloadSecretIfNeeded(
+                    secretName: "secret",
+                    overrideCacheTTL: true
+                )
 
                 try await group.waitForAll()
             }
@@ -126,7 +131,7 @@ struct WatcherTests {
 
     @Test func watcherCleanupAfterHandlerReturns() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": #"{"field": "value"}"#
+            "secret": #"{"field": "value"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,

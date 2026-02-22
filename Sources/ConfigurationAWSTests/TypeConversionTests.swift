@@ -1,5 +1,5 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 #if canImport(FoundationEssentials)
@@ -10,10 +10,9 @@ import Foundation
 
 @Suite("Type Conversion")
 struct TypeConversionTests {
-
     @Test func stringType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": "hello"]
+            "s": ["key": "hello"],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .string)
         #expect(result.value?.content == .string("hello"))
@@ -22,7 +21,7 @@ struct TypeConversionTests {
 
     @Test func intType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": 42]
+            "s": ["key": 42],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .int)
         #expect(result.value?.content == .int(42))
@@ -30,7 +29,7 @@ struct TypeConversionTests {
 
     @Test func doubleType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": 3.14]
+            "s": ["key": 3.14],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .double)
         #expect(result.value?.content == .double(3.14))
@@ -38,7 +37,7 @@ struct TypeConversionTests {
 
     @Test func boolType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": true]
+            "s": ["key": true],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .bool)
         #expect(result.value?.content == .bool(true))
@@ -46,7 +45,7 @@ struct TypeConversionTests {
 
     @Test func bytesType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": [109, 97, 103] as [Int]]
+            "s": ["key": [109, 97, 103] as [Int]],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .bytes)
         #expect(result.value?.content == .bytes([109, 97, 103]))
@@ -54,7 +53,7 @@ struct TypeConversionTests {
 
     @Test func stringArrayType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": ["a", "b"]]
+            "s": ["key": ["a", "b"]],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .stringArray)
         #expect(result.value?.content == .stringArray(["a", "b"]))
@@ -62,7 +61,7 @@ struct TypeConversionTests {
 
     @Test func intArrayType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": [1, 2, 3]]
+            "s": ["key": [1, 2, 3]],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .intArray)
         #expect(result.value?.content == .intArray([1, 2, 3]))
@@ -70,7 +69,7 @@ struct TypeConversionTests {
 
     @Test func doubleArrayType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": [1.1, 2.2]]
+            "s": ["key": [1.1, 2.2]],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .doubleArray)
         #expect(result.value?.content == .doubleArray([1.1, 2.2]))
@@ -78,7 +77,7 @@ struct TypeConversionTests {
 
     @Test func boolArrayType() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": [true, false]]
+            "s": ["key": [true, false]],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .boolArray)
         #expect(result.value?.content == .boolArray([true, false]))
@@ -88,7 +87,8 @@ struct TypeConversionTests {
         // byteChunkArray comes from JSONSerialization which produces NSArray of NSArray
         // We need to test via the provider path to get realistic data
         let jsonString = #"{"key": [[109, 97], [103, 105]]}"#
-        let dict = try JSONSerialization.jsonObject(with: Data(jsonString.utf8)) as! [String: Sendable]
+        let dict = try #require(JSONSerialization
+            .jsonObject(with: Data(jsonString.utf8)) as? [String: Sendable])
         let snapshot = AWSSecretsManagerProviderSnapshot(values: ["s": dict])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .byteChunkArray)
         #expect(result.value?.content == .byteChunkArray([[109, 97], [103, 105]]))
@@ -96,7 +96,7 @@ struct TypeConversionTests {
 
     @Test func typeMismatchReturnsNil() throws {
         let snapshot = AWSSecretsManagerProviderSnapshot(values: [
-            "s": ["key": "hello"]
+            "s": ["key": "hello"],
         ])
         let result = try snapshot.value(forKey: configKey("s.key"), type: .int)
         #expect(result.value == nil)

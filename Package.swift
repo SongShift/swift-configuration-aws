@@ -6,18 +6,22 @@ import PackageDescription
 let package = Package(
     name: "swift-configuration-aws",
     platforms: [
-        .macOS(.v15)
+        .macOS(.v15),
     ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
+        // Products define the executables and libraries a package produces, making them visible to
+        // other packages.
         .library(
             name: "swift-configuration-aws",
             targets: ["ConfigurationAWS"]
-        )
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-configuration", from: "1.1.0"),
-        .package(url: "https://github.com/swift-server/swift-service-lifecycle", .upToNextMinor(from: "2.9.1")),
+        .package(
+            url: "https://github.com/swift-server/swift-service-lifecycle",
+            .upToNextMinor(from: "2.9.1")
+        ),
         .package(url: "https://github.com/soto-project/soto.git", from: "7.10.0"),
     ],
     targets: [

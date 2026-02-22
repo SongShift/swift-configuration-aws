@@ -1,10 +1,9 @@
-import Testing
 import Configuration
+import Testing
 @testable import ConfigurationAWS
 
 @Suite("Initialization")
 struct InitializationTests {
-
     @Test func simpleInitHasEmptyCache() async throws {
         let vendor = MockVendor(secrets: [:])
         let provider = AWSSecretsManagerProvider(vendor: vendor)
@@ -21,7 +20,7 @@ struct InitializationTests {
 
     @Test func prefetchInitPopulatesCache() async throws {
         let vendor = MockVendor(secrets: [
-            "mySecret": #"{"field": "hello"}"#
+            "mySecret": #"{"field": "hello"}"#,
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,
@@ -66,7 +65,7 @@ struct InitializationTests {
 
     @Test func prefetchInitVendorReturnsInvalidJSON() async throws {
         let vendor = MockVendor(secrets: [
-            "secret": "not valid json"
+            "secret": "not valid json",
         ])
         let provider = try await AWSSecretsManagerProvider(
             vendor: vendor,

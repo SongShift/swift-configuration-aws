@@ -9,10 +9,16 @@ actor MockVendor: AWSSecretsManagerVendor {
     private let handler: (@Sendable (String) async throws -> String?)?
     private var _calls: [Call] = []
 
-    var calls: [Call] { _calls }
-    var callCount: Int { _calls.count }
+    var calls: [Call] {
+        self._calls
+    }
+
+    var callCount: Int {
+        self._calls.count
+    }
+
     func callCount(forKey key: String) -> Int {
-        _calls.filter { $0.key == key }.count
+        self._calls.count(where: { $0.key == key })
     }
 
     init(handler: @escaping @Sendable (String) async throws -> String?) {
@@ -26,25 +32,25 @@ actor MockVendor: AWSSecretsManagerVendor {
     }
 
     func setSecret(_ key: String, value: String) {
-        secrets[key] = value
+        self.secrets[key] = value
     }
 
     func removeSecret(_ key: String) {
-        secrets.removeValue(forKey: key)
+        self.secrets.removeValue(forKey: key)
     }
 
     private var errors: [String: any Error] = [:]
 
     func setError(_ error: any Error, forKey key: String) {
-        errors[key] = error
+        self.errors[key] = error
     }
 
     func fetchSecretValue(forKey key: String) async throws -> String? {
-        _calls.append(Call(key: key))
+        self._calls.append(Call(key: key))
         if let handler {
             return try await handler(key)
         }
         if let error = errors[key] { throw error }
-        return secrets[key]
+        return self.secrets[key]
     }
 }

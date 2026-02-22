@@ -12,12 +12,15 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
     public let providerName: String = "AWSSecretsManagerProvider"
 
     var values: [String: [String: Sendable]]
-    
+
     public init(values: [String: [String: Sendable]]) {
         self.values = values
     }
 
-    public func value(forKey key: Configuration.AbsoluteConfigKey, type: Configuration.ConfigType) throws -> Configuration.LookupResult {
+    public func value(
+        forKey key: Configuration.AbsoluteConfigKey,
+        type: Configuration.ConfigType
+    ) throws -> Configuration.LookupResult {
         let encodedKey = key.description
 
         let keyComponents = key.components
@@ -25,17 +28,24 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
             return LookupResult(encodedKey: encodedKey, value: nil)
         }
 
-        let secretLookupDict = values[secretName]
+        let secretLookupDict = self.values[secretName]
 
-        guard let content = extractConfigContent(from: secretLookupDict, keyComponents: key.components, type: type) else {
+        guard let content = extractConfigContent(
+            from: secretLookupDict,
+            keyComponents: key.components,
+            type: type
+        ) else {
             return LookupResult(encodedKey: encodedKey, value: nil)
         }
 
         let resultConfigValue = ConfigValue(content, isSecret: true)
         return LookupResult(encodedKey: encodedKey, value: resultConfigValue)
     }
-    
-    private func navigateNestedDictionary(_ dictionary: [String: Sendable], keyComponents: ArraySlice<String>) -> [String: Sendable]? {
+
+    private func navigateNestedDictionary(
+        _ dictionary: [String: Sendable],
+        keyComponents: ArraySlice<String>
+    ) -> [String: Sendable]? {
         var currentDictionary = dictionary
         var remainingComponents = keyComponents
 
@@ -98,12 +108,19 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
         }
     }
 
-    private func extractConfigContent(from dictionary: [String: Sendable]?, keyComponents: [String], type: ConfigType) -> ConfigContent? {
-        guard let dictionary = dictionary else {
+    private func extractConfigContent(
+        from dictionary: [String: Sendable]?,
+        keyComponents: [String],
+        type: ConfigType
+    ) -> ConfigContent? {
+        guard let dictionary else {
             return nil
         }
 
-        guard let finalDictionary = navigateNestedDictionary(dictionary, keyComponents: keyComponents.dropFirst()) else {
+        guard let finalDictionary = navigateNestedDictionary(
+            dictionary,
+            keyComponents: keyComponents.dropFirst()
+        ) else {
             return nil
         }
 
@@ -112,6 +129,6 @@ public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
             return nil
         }
 
-        return convertToConfigContent(secretValue, type: type)
+        return self.convertToConfigContent(secretValue, type: type)
     }
 }
