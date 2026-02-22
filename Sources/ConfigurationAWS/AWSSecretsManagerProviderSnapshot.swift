@@ -7,8 +7,6 @@
 //
 
 import Configuration
-import ServiceLifecycle
-import AsyncAlgorithms
 
 public struct AWSSecretsManagerProviderSnapshot: ConfigSnapshot {
     public let providerName: String = "AWSSecretsManagerProvider"
