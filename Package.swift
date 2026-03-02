@@ -46,5 +46,18 @@ let package = Package(
                 .product(name: "ConfigurationTesting", package: "swift-configuration"),
             ]
         ),
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: [
+                "ConfigurationAWS",
+                .product(name: "Configuration", package: "swift-configuration"),
+                .product(name: "ConfigurationTesting", package: "swift-configuration"),
+                .product(
+                    name: "SotoSecretsManager",
+                    package: "soto",
+                    condition: .when(traits: ["Soto"])
+                ),
+            ]
+        ),
     ]
 )
