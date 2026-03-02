@@ -22,10 +22,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-configuration", from: "1.1.0"),
-        .package(
-            url: "https://github.com/swift-server/swift-service-lifecycle",
-            .upToNextMinor(from: "2.9.1")
-        ),
+        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0"),
         .package(url: "https://github.com/soto-project/soto.git", from: "7.10.0"),
     ],
     targets: [
