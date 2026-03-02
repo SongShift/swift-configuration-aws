@@ -1,8 +1,8 @@
 //
 //  ProviderTests.swift
-//  swift-configuration-aws
 //
-//  Created by Ben on 11/16/25.
+//  Created by Ben Rosen on 2/22/26.
+//  Copyright © 2026 SongShift, LLC. All rights reserved.
 //
 
 import ConfigurationTesting

@@ -1,9 +1,8 @@
 //
 //  AWSSecretsManagerProvider+Watching.swift
-//  swift-configuration-aws
 //
-//  Created by Ben Rosen on 11/5/25.
-//  Copyright © 2025 SongShift, LLC. All rights reserved.
+//  Created by Ben Rosen on 2/22/26.
+//  Copyright © 2026 SongShift, LLC. All rights reserved.
 //
 
 import Configuration
