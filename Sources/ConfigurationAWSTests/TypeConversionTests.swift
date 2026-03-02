@@ -6,14 +6,9 @@
 //
 
 import Configuration
+import Foundation
 import Testing
 @testable import ConfigurationAWS
-
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
 
 @Suite("Type Conversion")
 struct TypeConversionTests {

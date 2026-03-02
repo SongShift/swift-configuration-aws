@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build
+      - name: Run unit tests
+        run: swift test --filter ConfigurationAWSTests
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    services:
+      localstack:
+        image: localstack/localstack
+        env:
+          SERVICES: secretsmanager
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      LOCALSTACK_ENDPOINT: http://localstack:4566
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run integration tests
+        run: swift test --traits Soto --filter IntegrationTests
