@@ -1,5 +1,7 @@
 # Swift Configuration AWS
 
+[![CI](https://github.com/SongShift/swift-configuration-aws/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/SongShift/swift-configuration-aws/actions/workflows/ci.yml)
+
 An [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/) provider for the [Swift Configuration](https://github.com/apple/swift-configuration) framework.
 
 This package implements Swift Configuration's `ConfigProvider` protocol to vend secrets stored in AWS Secrets Manager. It is not a general-purpose configuration library. For the core API (readers, provider hierarchy, watching, etc.), see the [swift-configuration](https://github.com/apple/swift-configuration) repository.
