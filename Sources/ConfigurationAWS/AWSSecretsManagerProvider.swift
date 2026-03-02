@@ -1,6 +1,5 @@
 //
 //  AWSSecretsManagerProvider.swift
-//  swift-configuration-aws
 //
 //  Created by Ben Rosen on 11/5/25.
 //  Copyright © 2025 SongShift, LLC. All rights reserved.

@@ -1,3 +1,10 @@
+//
+//  TestClock.swift
+//
+//  Created by Ben Rosen on 2/22/26.
+//  Copyright © 2026 SongShift, LLC. All rights reserved.
+//
+
 final class TestClock: Clock, Sendable {
     typealias Duration = Swift.Duration
     typealias Instant = ContinuousClock.Instant
