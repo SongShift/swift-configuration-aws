@@ -1,6 +1,8 @@
 # Swift Configuration AWS
 
-[![CI](https://github.com/SongShift/swift-configuration-aws/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/SongShift/swift-configuration-aws/actions/workflows/ci.yml)
+[![](https://img.shields.io/badge/Swift-6.2+-red?logo=Swift&logoColor=white)](https://swift.org)
+[![](https://github.com/SongShift/swift-configuration-aws/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/SongShift/swift-configuration-aws/actions/workflows/ci.yml)
+[![](https://img.shields.io/github/v/release/SongShift/swift-configuration-aws)](https://github.com/SongShift/swift-configuration-aws/releases)
 
 An [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/) provider for the [Swift Configuration](https://github.com/apple/swift-configuration) framework.
 
